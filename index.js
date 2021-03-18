@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const getPathNode = ({pathStr, relativePathStr, pathToNode}) => {
+const getPathNode = ({pathStr, relativePathStr, pathToNode, level}) => {
     if (!fs.existsSync(pathStr)) {
         return;
     }
@@ -17,7 +17,8 @@ const getPathNode = ({pathStr, relativePathStr, pathToNode}) => {
         relativePath: relativePathStr,
         name,
         type: 'directory',
-        pathToNode
+        pathToNode,
+        level
     }
 
     const stat = fs.statSync(pathStr);
@@ -43,15 +44,17 @@ function Node(val,children) {
 // 2. 层序（文件&文件夹）数组
 var levelOrderDir = function(rootPath) {
     if (!rootPath) { return []; }
+    let curLevel = 0;
     let res = [], queue = [{pathStr: rootPath, index: 0, pathToNode: 'root', relativePathStr: ''}], curr;
     while(queue.length > 0) {
         let level = [], levellen = queue.length;
         for (let i=0; i< levellen; i++) {
-            curr = getPathNode(queue.shift());
+            curr = getPathNode({...queue.shift(), level: curLevel});
             queue.push(...curr.children);
             level.push(curr.val);
         }
         res.push(level);
+        curLevel++;
     }
     return res;
 };

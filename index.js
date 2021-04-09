@@ -1,6 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
+// 1. 平铺文件数组
+
+var fileArrIter = function(pathObj) {
+    if (!pathObj.pathStr) { return []; }
+    const root = getPathNode(pathObj);
+    return [
+        root.val,  ...root.children.map((pathObj)=> fileArrIter(pathObj))
+    ];
+}
+
+var fileArr = function(rootPath, onlyFile = true, onlyExt) {
+    if (!rootPath) { return []; }
+    return fileArrIter({pathStr: rootPath, index: 0, pathToNode: 'root', relativePathStr: ''});
+}
+
+
 const getPathNode = ({pathStr, relativePathStr, pathToNode, level}) => {
     if (!fs.existsSync(pathStr)) {
         return;
@@ -41,7 +57,7 @@ function Node(val,children) {
   this.children = children;
 };
 
-// 2. 层序（文件&文件夹）数组
+// 2. 层序（文件&文件夹）数组 TODO 只遍历前k层
 var levelOrderDir = function(rootPath) {
     if (!rootPath) { return []; }
     let curLevel = 0;
